@@ -1,6 +1,7 @@
 # Additional documentation
 
 Consult the main [README](../README.md) for general information about the project.
+For a plain-language tour of the repo, open [Simple Overview](simple_overview/index.html).
 These are advanced topics that are not necessary for a basic deployment.
 
 - Deploying:

@@ -83,11 +83,17 @@ export type ResponseContext = {
     answer?: string;
 };
 
+export type ClientTiming = {
+    total_ms: number;
+    ttft_ms?: number;
+};
+
 export type ChatAppResponseOrError = {
     message: ResponseMessage;
     delta: ResponseMessage;
     context: ResponseContext;
     session_state: any;
+    client_timing?: ClientTiming;
     error?: string;
 };
 
@@ -96,6 +102,7 @@ export type ChatAppResponse = {
     delta: ResponseMessage;
     context: ResponseContext;
     session_state: any;
+    client_timing?: ClientTiming;
 };
 
 export type ChatAppRequestContext = {

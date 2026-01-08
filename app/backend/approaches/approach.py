@@ -1,5 +1,7 @@
 import base64
 import json
+import logging
+import time
 import re
 from abc import ABC
 from collections.abc import AsyncGenerator, Awaitable
@@ -34,6 +36,7 @@ from azure.search.documents.models import (
     VectorizedQuery,
     VectorQuery,
 )
+from azure.core.exceptions import HttpResponseError
 from openai import AsyncOpenAI, AsyncStream
 from openai.types import CompletionUsage
 from openai.types.chat import (
@@ -47,6 +50,8 @@ from openai.types.chat import (
 from approaches.promptmanager import PromptManager
 from prepdocslib.blobmanager import AdlsBlobManager, BlobManager
 from prepdocslib.embeddings import ImageEmbeddings
+
+logger = logging.getLogger("approaches")
 
 
 @dataclass
@@ -63,6 +68,11 @@ class Document:
     id: Optional[str] = None
     ref_id: Optional[str] = None  # Reference id from agentic retrieval (if applicable)
     content: Optional[str] = None
+    name: Optional[str] = None
+    email: Optional[str] = None
+    practice: Optional[str] = None
+    role: Optional[str] = None
+    sollicitation: Optional[str] = None
     category: Optional[str] = None
     sourcepage: Optional[str] = None
     sourcefile: Optional[str] = None
@@ -79,6 +89,11 @@ class Document:
             "type": "searchIndex",
             "id": self.id,
             "content": self.content,
+            "name": self.name,
+            "email": self.email,
+            "practice": self.practice,
+            "role": self.role,
+            "sollicitation": self.sollicitation,
             "category": self.category,
             "sourcepage": self.sourcepage,
             "sourcefile": self.sourcefile,
@@ -556,10 +571,26 @@ class Approach(ABC):
         }
         request_kwargs.update(agentic_retrieval_input)
 
-        response = await knowledgebase_client.retrieve(
-            retrieval_request=KnowledgeBaseRetrievalRequest(**request_kwargs),
-            x_ms_query_source_authorization=access_token,
-        )
+        retrieval_request = KnowledgeBaseRetrievalRequest(**request_kwargs)
+        request_payload = retrieval_request.as_dict()
+        start_time = time.perf_counter()
+        try:
+            response = await knowledgebase_client.retrieve(
+                retrieval_request=retrieval_request,
+                x_ms_query_source_authorization=access_token,
+            )
+        except HttpResponseError:
+            duration_ms = int((time.perf_counter() - start_time) * 1000)
+            logger.exception(
+                "Agentic retrieval failed for index '%s' after %sms with payload: %s",
+                search_index_name,
+                duration_ms,
+                json.dumps(request_payload, ensure_ascii=True),
+            )
+            raise
+        duration_ms = int((time.perf_counter() - start_time) * 1000)
+        logger.info("Agentic retrieval succeeded for index '%s' in %sms", search_index_name, duration_ms)
+        logger.debug("Agentic retrieval payload for index '%s': %s", search_index_name, json.dumps(request_payload, ensure_ascii=True))
 
         # Map activity id -> agent's internal search query and citation
         activities = response.activity or []
@@ -602,6 +633,11 @@ class Approach(ABC):
                         id=ref.doc_key,
                         ref_id=ref.id,
                         content=ref.source_data.get("content"),
+                        name=ref.source_data.get("name"),
+                        email=ref.source_data.get("email"),
+                        practice=ref.source_data.get("practice"),
+                        role=ref.source_data.get("role"),
+                        sollicitation=ref.source_data.get("sollicitation"),
                         category=ref.source_data.get("category"),
                         sourcepage=ref.source_data.get("sourcepage"),
                         sourcefile=ref.source_data.get("sourcefile"),
@@ -754,10 +790,29 @@ class Approach(ABC):
         external_results_metadata: list[dict[str, Any]] = []
         citation_activity_details: dict[str, dict[str, Any]] = {}
 
+        def format_doc_metadata(doc: Document, include_name: bool) -> str:
+            parts = []
+            if include_name and doc.name:
+                parts.append(f"Name: {doc.name}")
+            if doc.email:
+                parts.append(f"Email: {doc.email}")
+            if doc.practice:
+                parts.append(f"Practice: {doc.practice}")
+            if doc.role:
+                parts.append(f"Role: {doc.role}")
+            if doc.sollicitation:
+                parts.append(f"Solicitation: {doc.sollicitation}")
+            return "; ".join(parts)
+
         for doc in results:
             # Get the citation for the source page
             citation = self.get_citation(doc.sourcepage)
-            if citation not in citations:
+            if not citation:
+                if doc.name:
+                    citation = doc.name
+                elif doc.id:
+                    citation = doc.id
+            if citation and citation not in citations:
                 citations.append(citation)
                 # Add activity details if available
                 if doc.activity:
@@ -769,7 +824,11 @@ class Approach(ABC):
                     cleaned = clean_source(" . ".join([cast(str, c.text) for c in doc.captions]))
                 else:
                     cleaned = clean_source(doc.content or "")
-                text_sources.append(f"{citation}: {cleaned}")
+                metadata_prefix = format_doc_metadata(doc, include_name=doc.name != citation)
+                if metadata_prefix:
+                    text_sources.append(f"{citation}: {metadata_prefix}. {cleaned}")
+                else:
+                    text_sources.append(f"{citation}: {cleaned}")
 
             if download_image_sources and hasattr(doc, "images") and doc.images:
                 for img in doc.images:

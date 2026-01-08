@@ -47,6 +47,17 @@ export const Answer = ({
     const { t } = useTranslation();
     const sanitizedAnswerHtml = DOMPurify.sanitize(parsedAnswer.answerHtml);
     const [copied, setCopied] = useState(false);
+    const timing = answer.client_timing;
+
+    const formatDuration = (valueMs?: number) => {
+        if (valueMs === undefined || Number.isNaN(valueMs)) {
+            return "—";
+        }
+        if (valueMs >= 1000) {
+            return `${(valueMs / 1000).toFixed(1)}s`;
+        }
+        return `${Math.round(valueMs)}ms`;
+    };
 
     const handleCopy = () => {
         const tempElement = document.createElement("div");
@@ -99,6 +110,11 @@ export const Answer = ({
                         {showSpeechOutputBrowser && <SpeechOutputBrowser answer={sanitizedAnswerHtml} />}
                     </div>
                 </Stack>
+                {timing && (
+                    <div className={styles.timingRow}>
+                        <span>{`TTFT ${formatDuration(timing.ttft_ms)} • Total ${formatDuration(timing.total_ms)}`}</span>
+                    </div>
+                )}
             </Stack.Item>
 
             <Stack.Item grow>

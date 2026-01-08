@@ -145,9 +145,15 @@ const Chat = () => {
         });
     };
 
-    const handleAsyncRequest = async (question: string, answers: [string, ChatAppResponse][], responseBody: ReadableStream<any>) => {
+    const handleAsyncRequest = async (
+        question: string,
+        answers: [string, ChatAppResponse][],
+        responseBody: ReadableStream<any>,
+        requestStartMs: number
+    ) => {
         let answer: string = "";
         let askResponse: ChatAppResponse = {} as ChatAppResponse;
+        let ttftMs: number | undefined;
 
         const updateState = (newContent: string) => {
             return new Promise(resolve => {
@@ -165,15 +171,18 @@ const Chat = () => {
         try {
             setIsStreaming(true);
             for await (const event of readNDJSONStream(responseBody)) {
-                if (event["context"] && event["context"]["data_points"]) {
-                    event["message"] = event["delta"];
-                    askResponse = event as ChatAppResponse;
-                } else if (event["delta"] && event["delta"]["content"]) {
-                    setIsLoading(false);
-                    await updateState(event["delta"]["content"]);
-                } else if (event["context"]) {
-                    // Update context with new keys from latest event
-                    askResponse.context = { ...askResponse.context, ...event["context"] };
+            if (event["context"] && event["context"]["data_points"]) {
+                event["message"] = event["delta"];
+                askResponse = event as ChatAppResponse;
+            } else if (event["delta"] && event["delta"]["content"]) {
+                if (ttftMs === undefined) {
+                    ttftMs = performance.now() - requestStartMs;
+                }
+                setIsLoading(false);
+                await updateState(event["delta"]["content"]);
+            } else if (event["context"]) {
+                // Update context with new keys from latest event
+                askResponse.context = { ...askResponse.context, ...event["context"] };
                 } else if (event["error"]) {
                     throw Error(event["error"]);
                 }
@@ -181,9 +190,14 @@ const Chat = () => {
         } finally {
             setIsStreaming(false);
         }
+        const totalMs = performance.now() - requestStartMs;
         const fullResponse: ChatAppResponse = {
             ...askResponse,
-            message: { content: answer, role: askResponse.message.role }
+            message: { content: answer, role: askResponse.message.role },
+            client_timing: {
+                total_ms: totalMs,
+                ttft_ms: ttftMs ?? totalMs
+            }
         };
         return fullResponse;
     };
@@ -277,7 +291,9 @@ const Chat = () => {
                 session_state: answers.length ? answers[answers.length - 1][1].session_state : null
             };
 
+            const requestStartMs = performance.now();
             const response = await chatApi(request, shouldStream, token);
+            const responseStartMs = performance.now();
             if (!response.body) {
                 throw Error("No response body");
             }
@@ -285,7 +301,7 @@ const Chat = () => {
                 throw Error(`Request failed with status ${response.status}`);
             }
             if (shouldStream) {
-                const parsedResponse: ChatAppResponse = await handleAsyncRequest(question, answers, response.body);
+                const parsedResponse: ChatAppResponse = await handleAsyncRequest(question, answers, response.body, requestStartMs);
                 setAnswers([...answers, [question, parsedResponse]]);
                 if (typeof parsedResponse.session_state === "string" && parsedResponse.session_state !== "") {
                     const token = client ? await getToken(client) : undefined;
@@ -296,10 +312,17 @@ const Chat = () => {
                 if (parsedResponse.error) {
                     throw Error(parsedResponse.error);
                 }
-                setAnswers([...answers, [question, parsedResponse as ChatAppResponse]]);
+                const responseWithTiming: ChatAppResponse = {
+                    ...(parsedResponse as ChatAppResponse),
+                    client_timing: {
+                        total_ms: performance.now() - requestStartMs,
+                        ttft_ms: responseStartMs - requestStartMs
+                    }
+                };
+                setAnswers([...answers, [question, responseWithTiming]]);
                 if (typeof parsedResponse.session_state === "string" && parsedResponse.session_state !== "") {
                     const token = client ? await getToken(client) : undefined;
-                    historyManager.addItem(parsedResponse.session_state, [...answers, [question, parsedResponse as ChatAppResponse]], token);
+                    historyManager.addItem(parsedResponse.session_state, [...answers, [question, responseWithTiming]], token);
                 }
             }
             setSpeechUrls([...speechUrls, null]);

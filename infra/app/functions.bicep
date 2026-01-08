@@ -21,6 +21,12 @@ param textProcessorName string
 // OpenID issuer provided by main template (e.g. https://login.microsoftonline.com/<tenantId>/v2.0)
 param openIdIssuer string
 
+@description('Existing Entra ID application (client) ID for skill auth. Leave empty to create app registrations.')
+param functionsAuthClientId string = ''
+
+@description('Existing Entra ID identifier URI for skill auth. Leave empty to default to api://<clientId>.')
+param functionsAuthIdentifierUri string = ''
+
 @description('The principal ID of the Search service user-assigned managed identity')
 param searchUserAssignedIdentityClientId string
 
@@ -217,6 +223,8 @@ module documentExtractorAppReg '../core/auth/appregistration.bicep' = {
     clientAppDisplayName: '${documentExtractorName} Entra App'
     issuer: openIdIssuer
     webAppEndpoint: 'https://${documentExtractorName}.azurewebsites.net'
+    existingClientAppId: functionsAuthClientId
+    existingIdentifierUri: functionsAuthIdentifierUri
   }
 }
 
@@ -260,6 +268,8 @@ module figureProcessorAppReg '../core/auth/appregistration.bicep' = {
     clientAppDisplayName: 'skill-${figureProcessorName}'
     issuer: openIdIssuer
     webAppEndpoint: 'https://${figureProcessorName}.azurewebsites.net'
+    existingClientAppId: functionsAuthClientId
+    existingIdentifierUri: functionsAuthIdentifierUri
   }
 }
 
@@ -303,6 +313,8 @@ module textProcessorAppReg '../core/auth/appregistration.bicep' = {
     clientAppDisplayName: 'skill-${textProcessorName}'
     issuer: openIdIssuer
     webAppEndpoint: 'https://${textProcessorName}.azurewebsites.net'
+    existingClientAppId: functionsAuthClientId
+    existingIdentifierUri: functionsAuthIdentifierUri
   }
 }
 

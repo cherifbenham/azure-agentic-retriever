@@ -180,8 +180,17 @@ export function Component(): JSX.Element {
                 // AI Chat Protocol: Client must pass on any session state received from the server
                 session_state: answer ? answer.session_state : null
             };
+            const requestStartMs = performance.now();
             const result = await askApi(request, token);
-            setAnswer(result);
+            const totalMs = performance.now() - requestStartMs;
+            const responseWithTiming: ChatAppResponse = {
+                ...result,
+                client_timing: {
+                    total_ms: totalMs,
+                    ttft_ms: totalMs
+                }
+            };
+            setAnswer(responseWithTiming);
             setSpeechUrls([null]);
         } catch (e) {
             setError(e);

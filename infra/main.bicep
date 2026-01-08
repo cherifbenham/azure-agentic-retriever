@@ -133,6 +133,16 @@ param useMultimodal bool = false
 param useEval bool = false
 param useCloudIngestion bool = false
 
+@description('Existing Entra ID application (client) ID for skill auth. Leave empty to create app registrations.')
+param functionsAuthClientId string = ''
+
+@description('Existing Entra ID identifier URI for skill auth. Leave empty to default to api://<clientId>.')
+param functionsAuthIdentifierUri string = ''
+
+var effectiveFunctionsAuthIdentifierUri = !empty(functionsAuthIdentifierUri)
+  ? functionsAuthIdentifierUri
+  : (!empty(functionsAuthClientId) ? 'api://${functionsAuthClientId}' : '')
+
 @allowed(['free', 'provisioned', 'serverless'])
 param cosmosDbSkuName string // Set in main.parameters.json
 param cosmodDbResourceGroupName string = ''
@@ -509,8 +519,8 @@ var appEnvVariables = {
   AZURE_OPENAI_SERVICE: isAzureOpenAiHost && deployAzureOpenAi ? openAi!.outputs.name : ''
   AZURE_OPENAI_CHATGPT_DEPLOYMENT: chatGpt.deploymentName
   AZURE_OPENAI_EMB_DEPLOYMENT: embedding.deploymentName
-  AZURE_OPENAI_knowledgeBase_MODEL: knowledgeBase.modelName
-  AZURE_OPENAI_knowledgeBase_DEPLOYMENT: knowledgeBase.deploymentName
+  AZURE_OPENAI_KNOWLEDGEBASE_MODEL: knowledgeBase.modelName
+  AZURE_OPENAI_KNOWLEDGEBASE_DEPLOYMENT: knowledgeBase.deploymentName
   AZURE_OPENAI_API_KEY_OVERRIDE: azureOpenAiApiKey
   AZURE_OPENAI_CUSTOM_URL: azureOpenAiCustomUrl
   // Used only with non-Azure OpenAI deployments
@@ -685,6 +695,8 @@ module functions 'app/functions.bicep' = if (useCloudIngestion) {
     openIdIssuer: authenticationIssuerUri
     appEnvVariables: appEnvVariables
     searchUserAssignedIdentityClientId: searchService.outputs.userAssignedIdentityClientId
+    functionsAuthClientId: functionsAuthClientId
+    functionsAuthIdentifierUri: effectiveFunctionsAuthIdentifierUri
   }
 }
 

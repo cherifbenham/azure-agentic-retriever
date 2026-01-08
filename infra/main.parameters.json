@@ -212,6 +212,12 @@
     "useCloudIngestion": {
       "value": "${USE_CLOUD_INGESTION=false}"
     },
+    "functionsAuthClientId": {
+      "value": "${AZURE_FUNCTIONS_AUTH_CLIENT_ID}"
+    },
+    "functionsAuthIdentifierUri": {
+      "value": "${AZURE_FUNCTIONS_AUTH_IDENTIFIER_URI}"
+    },
     "enableLanguagePicker": {
       "value": "${ENABLE_LANGUAGE_PICKER=false}"
     },

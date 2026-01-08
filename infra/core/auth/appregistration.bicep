@@ -35,6 +35,12 @@ param clientAppName string
 @description('Specifies the display name for the client application')
 param clientAppDisplayName string
 
+@description('Existing Entra ID application (client) ID to reuse for authentication. Leave empty to create a new app registration.')
+param existingClientAppId string = ''
+
+@description('Existing Entra ID identifier URI to reuse for authentication. Leave empty to default to api://<clientId>.')
+param existingIdentifierUri string = ''
+
 param serviceManagementReference string = ''
 
 param issuer string
@@ -60,10 +66,12 @@ var allScopes = [
   userImpersonationScope
 ]
 
-// Is this going to work with search service? Otherwise we have to set behind the scene?
-var identifierUri = 'api://${appUniqueName}-${uniqueString(subscription().id, resourceGroup().id, appUniqueName)}'
+var useExistingApp = !empty(existingClientAppId)
+var generatedIdentifierUri = 'api://${appUniqueName}-${uniqueString(subscription().id, resourceGroup().id, appUniqueName)}'
+var fallbackIdentifierUri = !empty(existingIdentifierUri) ? existingIdentifierUri : (!empty(existingClientAppId) ? 'api://${existingClientAppId}' : '')
+var identifierUri = useExistingApp ? fallbackIdentifierUri : generatedIdentifierUri
 
-resource appRegistration 'Microsoft.Graph/applications@v1.0' = {
+resource appRegistration 'Microsoft.Graph/applications@v1.0' = if (!useExistingApp) {
   uniqueName: clientAppName
   displayName: clientAppDisplayName
   signInAudience: 'AzureADMyOrg'
@@ -96,11 +104,11 @@ resource appRegistration 'Microsoft.Graph/applications@v1.0' = {
 
 }
 
-resource appServicePrincipal 'Microsoft.Graph/servicePrincipals@v1.0' = {
+resource appServicePrincipal 'Microsoft.Graph/servicePrincipals@v1.0' = if (!useExistingApp) {
   appId: appRegistration.appId
 }
 
-resource federatedIdentityCredential 'Microsoft.Graph/applications/federatedIdentityCredentials@v1.0' = {
+resource federatedIdentityCredential 'Microsoft.Graph/applications/federatedIdentityCredentials@v1.0' = if (!useExistingApp) {
   name: '${appRegistration.uniqueName}/miAsFic'
   audiences: [
     audiences[cloudEnvironment].uri
@@ -109,8 +117,8 @@ resource federatedIdentityCredential 'Microsoft.Graph/applications/federatedIden
   subject: webAppIdentityId
 }
 
-output clientAppId string = appRegistration.appId
-output clientSpId string = appServicePrincipal.id
+output clientAppId string = useExistingApp ? existingClientAppId : appRegistration.appId
+output clientSpId string = useExistingApp ? '' : appServicePrincipal.id
 
 @description('The identifier URI of the application - returns the actual URI that was set')
 output identifierUri string = identifierUri

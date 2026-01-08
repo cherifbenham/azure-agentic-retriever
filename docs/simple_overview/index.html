@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Azure Search + OpenAI Demo — Plain Language Tour</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      font-size: 16px;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background-color: #f5f7fb;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      color: #222;
+    }
+    header {
+      background: linear-gradient(135deg, #2563eb, #9333ea);
+      color: #fff;
+      padding: 3rem 1.5rem;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0 0 0.75rem 0;
+      font-size: clamp(2rem, 4vw, 3rem);
+    }
+    header p {
+      margin: 0 auto;
+      max-width: 60ch;
+      font-size: 1.125rem;
+      line-height: 1.6;
+    }
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+    section {
+      background-color: #fff;
+      border-radius: 16px;
+      box-shadow: 0 18px 40px -24px rgba(37, 99, 235, 0.45);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 1.75rem;
+    }
+    p,
+    li {
+      line-height: 1.7;
+      font-size: 1rem;
+    }
+    .note {
+      background-color: #fef9c3;
+      border: 1px solid #fde68a;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      color: #713f12;
+    }
+    pre {
+      background-color: #0f172a0d;
+      border: 1px solid #dbeafe;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      overflow-x: auto;
+      font-family: "SFMono-Regular", Menlo, Consolas, monospace;
+      font-size: 0.95rem;
+      margin: 1rem 0;
+    }
+    ul {
+      padding-left: 1.2rem;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-top: 1.25rem;
+    }
+    .card {
+      border: 1px solid #dbeafe;
+      border-radius: 12px;
+      padding: 1.5rem;
+      background-color: #f8fbff;
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: #1d4ed8;
+    }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+      counter-reset: step;
+    }
+    .steps li {
+      background-color: #eef2ff;
+      border-radius: 12px;
+      padding: 1rem;
+      position: relative;
+      list-style: none;
+    }
+    .steps li::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      top: -16px;
+      left: 12px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: #4338ca;
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+    }
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    .actions div {
+      border-radius: 12px;
+      border: 1px solid #e0e7ff;
+      padding: 1.5rem;
+      background-color: #eef2ff;
+    }
+    a.cta {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.75rem 1.25rem;
+      border-radius: 999px;
+      background-color: #1d4ed8;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .disclaimer {
+      font-size: 0.95rem;
+      color: #555;
+      margin-top: 1.5rem;
+    }
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #0f172a;
+        color: #e2e8f0;
+      }
+      section {
+        background-color: #111827;
+        box-shadow: none;
+        border: 1px solid #1e293b;
+      }
+      .card {
+        background-color: #1f2937;
+        border-color: #374151;
+      }
+      .steps li {
+        background-color: #1f2937;
+      }
+      .actions div {
+        background-color: #1f2937;
+        border-color: #374151;
+      }
+      .disclaimer {
+        color: #94a3b8;
+      }
+      pre {
+        background-color: #1f2937;
+        border-color: #374151;
+      }
+      .note {
+        background-color: rgba(250, 204, 21, 0.12);
+        border-color: rgba(250, 204, 21, 0.35);
+        color: #facc15;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Azure Search + OpenAI Demo<br>Explained for Everyone</h1>
+    <p>
+      This page gives a friendly tour of the project so you can understand what it does, why it is useful,
+      and what to do next without reading every technical document.
+    </p>
+  </header>
+  <main>
+    <section>
+      <h2>What This Project Does</h2>
+      <p>
+        The repository contains a complete sample application that lets people chat with their own documents,
+        powered by Azure OpenAI and Azure AI Search. Think of it as a customizable assistant:
+        you upload company files, it builds a smart search index, and then it answers questions with citations.
+      </p>
+      <p>
+        The app includes a polished React frontend, a Python backend, and ready-to-use Azure infrastructure scripts.
+        Sample content from a fictional company (Contoso Electronics) is bundled so you can explore the experience instantly.
+      </p>
+    </section>
+
+    <section>
+      <h2>Key Features in Plain Words</h2>
+      <div class="card-grid">
+        <div class="card">
+          <h3>Chat or Ask</h3>
+          <p>Use a chat window for natural conversations or a single-question page when you only need quick answers.</p>
+        </div>
+        <div class="card">
+          <h3>Shows Its Work</h3>
+          <p>Every response comes with links to the documents it used, plus a trace of the reasoning steps.</p>
+        </div>
+        <div class="card">
+          <h3>Easy Experimenting</h3>
+          <p>Built-in settings let you change model behavior, test ideas, and compare results without coding.</p>
+        </div>
+        <div class="card">
+          <h3>Azure Ready</h3>
+          <p>Scripts deploy everything to Azure safely, from OpenAI models to data search and monitoring tools.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>How It Works Behind the Scenes</h2>
+      <ol class="steps">
+        <li>
+          <strong>Ingest documents.</strong> You run a prep script that reads PDFs, Word files, web pages, and more,
+          then stores clean snippets in Azure AI Search.
+        </li>
+        <li>
+          <strong>Ask a question.</strong> The backend rewrites the question if needed, pulls the most relevant snippets,
+          and sends them to Azure OpenAI.
+        </li>
+        <li>
+          <strong>Get an answer with sources.</strong> The model writes a response that cites the documents it used,
+          so you can double-check the facts.
+        </li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>What You Need to Try It</h2>
+      <ul>
+        <li>An Azure account with permission to deploy resources, plus enough credits to run OpenAI and search services.</li>
+        <li>Developer tools on your computer: Python 3.9+, Node.js 20+, Git, and the Azure Developer CLI (`azd`).</li>
+        <li>The sample data included in the repository, or your own files if you want to test with real content.</li>
+      </ul>
+      <p class="disclaimer">
+        This sample is designed for learning. Before using it in production, follow the security checklist in
+        <code>docs/productionizing.md</code> and review the Azure OpenAI landing zone guidance.
+      </p>
+    </section>
+
+    <section id="quick-start-guide">
+      <h2>Quick Start Guide</h2>
+      <p>Here is the simplest way to see the app working with the included sample data:</p>
+      <ol class="steps">
+        <li>
+          <strong>Prepare your tools.</strong> Install the Azure Developer CLI, Python 3.9+, Node.js 20+, and Git.
+        </li>
+        <li>
+          <strong>Get the code.</strong> In an empty folder run:
+          <pre><code>azd init -t azure-search-openai-demo</code></pre>
+          This command downloads the repo and sets up a new environment.
+        </li>
+        <li>
+          <strong>Load the example documents.</strong> From the project root run:
+          <pre><code>scripts/prepdocs.sh</code></pre>
+          (On Windows use <code>scripts/prepdocs.ps1</code>.) This script sends the Contoso sample files to Azure AI Search.
+        </li>
+        <li>
+          <strong>Launch everything.</strong> Sign in and deploy with:
+          <pre><code>azd auth login
+azd env new
+azd up</code></pre>
+          When the command finishes it prints the public URL. Open it to chat with the data.
+        </li>
+      </ol>
+      <p>
+        Prefer to run locally? Start the backend with <code>azd run watch --service backend</code> and the frontend with
+        <code>npm run dev</code> inside <code>app/frontend</code>. Both commands hot-reload as you make changes.
+      </p>
+      <div class="note">
+        Finished experimenting? Run <code>azd down</code> or delete the resource group in Azure to avoid extra charges.
+      </div>
+    </section>
+
+    <section>
+      <h2>Other Fast Start Options</h2>
+      <div class="card-grid">
+        <div class="card">
+          <h3>GitHub Codespaces</h3>
+          <p>Launch a cloud dev environment from your browser. Click the Codespaces badge in the main README, wait for setup,
+            then open a terminal and follow the same <code>azd</code> commands above.</p>
+        </div>
+        <div class="card">
+          <h3>VS Code Dev Containers</h3>
+          <p>Start Docker Desktop, open the repo in VS Code using the Dev Containers extension, and the container installs
+            all tools for you. Use the integrated terminal to run <code>scripts/prepdocs.sh</code> and <code>azd up</code>.</p>
+        </div>
+        <div class="card">
+          <h3>Customize Locally</h3>
+          <p>After <code>azd env new</code>, set optional environment tweaks (like auth or vision support) with
+            <code>azd env set</code>. Update the files in <code>app</code>, then redeploy with <code>azd deploy</code>.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Go Deeper with the Documentation</h2>
+      <p>
+        The <code>docs</code> folder expands on every part of the system. Here are the highlights:
+      </p>
+      <div class="card-grid">
+        <div class="card">
+          <h3>Deploying</h3>
+          <p>Step-by-step instructions for deploying with the Azure Developer CLI, troubleshooting, and using CI/CD.</p>
+        </div>
+        <div class="card">
+          <h3>Customization</h3>
+          <p>Guides for tweaking prompts, enabling multimodal models, adding speech, or securing the app with login.</p>
+        </div>
+        <div class="card">
+          <h3>Architecture</h3>
+          <p>Detailed diagrams that explain how the frontend, backend, and Azure services connect.</p>
+        </div>
+        <div class="card">
+          <h3>Data &amp; Evaluation</h3>
+          <p>Instructions for loading new documents and benchmarking your changes with automated tests.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>How We Measure Quality</h2>
+      <p>
+        The <code>evals/results</code> folder documents baseline tests run with current model settings.
+        For example, the default setup (June 2025) uses the GPT-4.1-mini chat model with a powerful embedding model.
+        Evaluations are run with GPT-4o to score answers, so you can compare future experiments against a known baseline.
+      </p>
+    </section>
+
+    <section>
+      <h2>Your Next Moves</h2>
+      <div class="actions">
+        <div>
+          <h3>Explore Locally</h3>
+          <p>
+            Install the prerequisites, then run <code>azd init -t azure-search-openai-demo</code> to pull the code.
+            Use the provided scripts to ingest sample data and start both the backend and frontend servers.
+          </p>
+          <a class="cta" href="#quick-start-guide">Read the quickstart guide</a>
+        </div>
+        <div>
+          <h3>Go to Azure</h3>
+          <p>
+            When you are ready, sign in with <code>azd auth login</code>, deploy with <code>azd up</code>,
+            and monitor the app with the built-in Application Insights dashboard.
+          </p>
+          <a class="cta" href="../deploy_features.md">See deployment options</a>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

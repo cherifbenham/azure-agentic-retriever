@@ -61,6 +61,7 @@ If necessary, edit this file to ensure it accurately reflects the current state 
 ## Adding new data
 
 New files should be added to the `data` folder, and then either run scripts/prepdocs.sh or scripts/prepdocs.ps1 to ingest the data.
+For JSON rows in `new-data/index.json` using `new-data/index-schema.json`, run scripts/prepjsonindex.sh or scripts/prepjsonindex.ps1 to create the index and upload records.
 
 ## Adding a new azd environment variable
 
@@ -76,6 +77,11 @@ You may also need to update:
 
 1. app/backend/prepdocs.py: If the variable is used in the ingestion script, retrieve it from environment variables here. Not always needed.
 1. app/backend/app.py: If the variable is used in the backend application, retrieve it from environment variables in setup_clients() function. Not always needed.
+
+For cloud ingestion Functions auth, you can reuse an existing Entra app registration by setting:
+
+* AZURE_FUNCTIONS_AUTH_CLIENT_ID
+* AZURE_FUNCTIONS_AUTH_IDENTIFIER_URI
 
 ## Adding a new setting to "Developer Settings" in RAG app
 
