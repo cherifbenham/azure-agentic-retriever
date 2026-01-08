@@ -169,7 +169,7 @@ markupsafe==3.0.3
     #   werkzeug
 mdurl==0.1.2
     # via markdown-it-py
-microsoft-kiota-abstractions==1.9.3
+microsoft-kiota-abstractions==1.9.8
     # via
     #   microsoft-kiota-authentication-azure
     #   microsoft-kiota-http
