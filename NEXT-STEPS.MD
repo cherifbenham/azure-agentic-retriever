@@ -1,7 +1,5 @@
 * rajouter les **liens des bookings** des candidats
-* rajouter les **noms** des **candidats**
-* demander source à sidney
-* rajouter lien de redirection booking
+* ~~rajouter les **noms** des **candidats**~~
 * post booking directement avec le bon **payload**
 * quand plusieurs candidats, se servir du volume de sollicitations, prioriser ceux qui sont **moins busy**
   * demander à **pierre le garsmeur**, le taux de **sollicitation** par **candidat**
