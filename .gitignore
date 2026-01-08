@@ -152,8 +152,17 @@ app/functions/*/prepdocslib/
 app/functions/*/requirements.txt
 
 data/**/*.md5
+new-data/
 
 .DS_Store
-
-
 *.txt
+local.settings.json
+.env.local
+.env.*
+.npmrc
+*.pem
+*.key
+*.pfx
+*.crt
+*.cer
+NEXT-STEPS.MD
