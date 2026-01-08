@@ -73,6 +73,8 @@ class Document:
     practice: Optional[str] = None
     role: Optional[str] = None
     sollicitation: Optional[str] = None
+    location: Optional[str] = None
+    url: Optional[str] = None
     category: Optional[str] = None
     sourcepage: Optional[str] = None
     sourcefile: Optional[str] = None
@@ -94,6 +96,8 @@ class Document:
             "practice": self.practice,
             "role": self.role,
             "sollicitation": self.sollicitation,
+            "location": self.location,
+            "url": self.url,
             "category": self.category,
             "sourcepage": self.sourcepage,
             "sourcefile": self.sourcefile,
@@ -355,6 +359,13 @@ class Approach(ABC):
                     Document(
                         id=document.get("id"),
                         content=document.get("content"),
+                        name=document.get("name"),
+                        email=document.get("email"),
+                        practice=document.get("practice"),
+                        role=document.get("role"),
+                        sollicitation=document.get("sollicitation"),
+                        location=document.get("location"),
+                        url=document.get("url"),
                         category=document.get("category"),
                         sourcepage=document.get("sourcepage"),
                         sourcefile=document.get("sourcefile"),
@@ -638,6 +649,8 @@ class Approach(ABC):
                         practice=ref.source_data.get("practice"),
                         role=ref.source_data.get("role"),
                         sollicitation=ref.source_data.get("sollicitation"),
+                        location=ref.source_data.get("location"),
+                        url=ref.source_data.get("url"),
                         category=ref.source_data.get("category"),
                         sourcepage=ref.source_data.get("sourcepage"),
                         sourcefile=ref.source_data.get("sourcefile"),
@@ -802,6 +815,12 @@ class Approach(ABC):
                 parts.append(f"Role: {doc.role}")
             if doc.sollicitation:
                 parts.append(f"Solicitation: {doc.sollicitation}")
+            if doc.location:
+                parts.append(f"Location: {doc.location}")
+            if doc.url:
+                parts.append(f"Booking URL: {doc.url}")
+            if doc.category:
+                parts.append(f"Category: {doc.category}")
             return "; ".join(parts)
 
         for doc in results:

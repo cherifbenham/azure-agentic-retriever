@@ -11,5 +11,3 @@
 * logger les outputs **Mistral vs** **Azure OpenAI**
 * accès **sharepoint** - **approval (sensible, optionnel)**
 * Cyber + AI : **Mejdi Arfaoui** reports to **Fakhreddine**
-
-[ ]

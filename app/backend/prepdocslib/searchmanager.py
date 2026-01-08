@@ -484,16 +484,39 @@ class SearchManager:
     async def create_knowledgebase(self):
         """Creates one or more Knowledge Bases in the search index based on desired knowledge sources."""
         if self.search_info.knowledgebase_name:
-            field_names = ["id", "sourcepage", "sourcefile", "content", "category"]
+            requested_field_names = [
+                "id",
+                "sourcepage",
+                "sourcefile",
+                "content",
+                "category",
+                "name",
+                "email",
+                "practice",
+                "role",
+                "sollicitation",
+                "location",
+                "url",
+            ]
             if self.use_acls:
-                field_names.extend(["oids", "groups"])
+                requested_field_names.extend(["oids", "groups"])
             if self.search_images:
-                field_names.append("images/url")
-
-            # Create field references using the new SDK pattern
-            source_data_fields = [SearchIndexFieldReference(name=field) for field in field_names]
+                requested_field_names.append("images/url")
 
             async with self.search_info.create_search_index_client() as search_index_client:
+                search_index = await search_index_client.get_index(self.search_info.index_name)
+                index_field_names = {field.name for field in search_index.fields}
+                field_names = []
+                for field in requested_field_names:
+                    if field == "images/url":
+                        if "images" in index_field_names:
+                            field_names.append(field)
+                        continue
+                    if field in index_field_names:
+                        field_names.append(field)
+
+                # Create field references using the new SDK pattern
+                source_data_fields = [SearchIndexFieldReference(name=field) for field in field_names]
                 search_index_knowledge_source = SearchIndexKnowledgeSource(
                     name=self.search_info.index_name,  # Use the same name for convenience
                     description="Default knowledge source using the main search index",
