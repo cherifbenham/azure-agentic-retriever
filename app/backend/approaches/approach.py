@@ -304,7 +304,7 @@ class Approach(ABC):
         self.user_blob_manager = user_blob_manager
         self.search_scoring_profile = search_scoring_profile
 
-    def build_filter(self, overrides: dict[str, Any]) -> Optional[str]:
+    def build_filter(self, overrides: dict[str, Any], user_query: Optional[str] = None) -> Optional[str]:
         include_category = overrides.get("include_category")
         exclude_category = overrides.get("exclude_category")
         filters = []
@@ -312,7 +312,54 @@ class Approach(ABC):
             filters.append("category eq '{}'".format(include_category.replace("'", "''")))
         if exclude_category:
             filters.append("category ne '{}'".format(exclude_category.replace("'", "''")))
+        location = overrides.get("include_location")
+        if not location and user_query:
+            location = self.infer_location(user_query)
+        if location:
+            filters.append("location eq '{}'".format(str(location).replace("'", "''")))
+        min_availability = overrides.get("min_availability")
+        if min_availability is None and user_query:
+            min_availability = self.infer_min_availability(user_query)
+        if min_availability is not None:
+            try:
+                value = float(min_availability)
+            except (TypeError, ValueError):
+                value = None
+            if value is not None:
+                value = max(0.0, min(1.0, value))
+                filters.append(f"availability ge {value}")
         return None if not filters else " and ".join(filters)
+
+    def normalize_query_text(self, text: str) -> str:
+        import unicodedata
+
+        normalized = unicodedata.normalize("NFKD", text)
+        normalized = normalized.encode("ascii", "ignore").decode("ascii")
+        return normalized.lower()
+
+    def infer_location(self, user_query: str) -> Optional[str]:
+        normalized = self.normalize_query_text(user_query)
+        if "toulouse" in normalized:
+            return "toulouse"
+        if "sophia antipolis" in normalized or "sophia-antipolis" in normalized:
+            return "sophia-antipolis"
+        return None
+
+    def infer_min_availability(self, user_query: str) -> Optional[float]:
+        normalized = self.normalize_query_text(user_query)
+        keywords = [
+            "availability",
+            "available",
+            "this week",
+            "next week",
+            "cette semaine",
+            "semaine prochaine",
+            "disponibilite",
+            "disponible",
+        ]
+        if any(keyword in normalized for keyword in keywords):
+            return 0.8
+        return None
 
     def get_expert_limit(self, overrides: dict[str, Any]) -> int:
         limit = overrides.get("max_experts")
