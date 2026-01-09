@@ -72,7 +72,7 @@ class Document:
     email: Optional[str] = None
     practice: Optional[str] = None
     role: Optional[str] = None
-    sollicitation: Optional[str] = None
+    availability: Optional[float] = None
     location: Optional[str] = None
     url: Optional[str] = None
     category: Optional[str] = None
@@ -95,7 +95,7 @@ class Document:
             "email": self.email,
             "practice": self.practice,
             "role": self.role,
-            "sollicitation": self.sollicitation,
+            "availability": self.availability,
             "location": self.location,
             "url": self.url,
             "category": self.category,
@@ -277,6 +277,7 @@ class Approach(ABC):
         image_embeddings_client: Optional[ImageEmbeddings] = None,
         global_blob_manager: Optional[BlobManager] = None,
         user_blob_manager: Optional[AdlsBlobManager] = None,
+        search_scoring_profile: Optional[str] = None,
     ):
         self.search_client = search_client
         self.openai_client = openai_client
@@ -300,6 +301,7 @@ class Approach(ABC):
         self.image_embeddings_client = image_embeddings_client
         self.global_blob_manager = global_blob_manager
         self.user_blob_manager = user_blob_manager
+        self.search_scoring_profile = search_scoring_profile
 
     def build_filter(self, overrides: dict[str, Any]) -> Optional[str]:
         include_category = overrides.get("include_category")
@@ -329,28 +331,36 @@ class Approach(ABC):
         search_text = query_text if use_text_search else ""
         search_vectors = vectors if use_vector_search else []
         if use_semantic_ranker:
-            results = await self.search_client.search(
-                search_text=search_text,
-                filter=filter,
-                top=top,
-                query_caption="extractive|highlight-false" if use_semantic_captions else None,
-                query_rewrites="generative" if use_query_rewriting else None,
-                vector_queries=search_vectors,
-                query_type=QueryType.SEMANTIC,
-                query_language=self.query_language,
-                query_speller=self.query_speller,
-                semantic_configuration_name="default",
-                semantic_query=query_text,
-                x_ms_query_source_authorization=access_token,
-            )
+            search_kwargs: dict[str, Any] = {
+                "search_text": search_text,
+                "filter": filter,
+                "top": top,
+                "query_caption": "extractive|highlight-false" if use_semantic_captions else None,
+                "query_rewrites": "generative" if use_query_rewriting else None,
+                "vector_queries": search_vectors,
+                "query_type": QueryType.SEMANTIC,
+                "query_language": self.query_language,
+                "query_speller": self.query_speller,
+                "semantic_configuration_name": "default",
+                "semantic_query": query_text,
+                "x_ms_query_source_authorization": access_token,
+            }
+            scoring_profile = getattr(self, "search_scoring_profile", None)
+            if scoring_profile:
+                search_kwargs["scoring_profile"] = scoring_profile
+            results = await self.search_client.search(**search_kwargs)
         else:
-            results = await self.search_client.search(
-                search_text=search_text,
-                filter=filter,
-                top=top,
-                vector_queries=search_vectors,
-                x_ms_query_source_authorization=access_token,
-            )
+            search_kwargs = {
+                "search_text": search_text,
+                "filter": filter,
+                "top": top,
+                "vector_queries": search_vectors,
+                "x_ms_query_source_authorization": access_token,
+            }
+            scoring_profile = getattr(self, "search_scoring_profile", None)
+            if scoring_profile:
+                search_kwargs["scoring_profile"] = scoring_profile
+            results = await self.search_client.search(**search_kwargs)
 
         documents: list[Document] = []
         async for page in results.by_page():
@@ -363,7 +373,7 @@ class Approach(ABC):
                         email=document.get("email"),
                         practice=document.get("practice"),
                         role=document.get("role"),
-                        sollicitation=document.get("sollicitation"),
+                        availability=document.get("availability"),
                         location=document.get("location"),
                         url=document.get("url"),
                         category=document.get("category"),
@@ -648,7 +658,7 @@ class Approach(ABC):
                         email=ref.source_data.get("email"),
                         practice=ref.source_data.get("practice"),
                         role=ref.source_data.get("role"),
-                        sollicitation=ref.source_data.get("sollicitation"),
+                        availability=ref.source_data.get("availability"),
                         location=ref.source_data.get("location"),
                         url=ref.source_data.get("url"),
                         category=ref.source_data.get("category"),
@@ -813,8 +823,8 @@ class Approach(ABC):
                 parts.append(f"Practice: {doc.practice}")
             if doc.role:
                 parts.append(f"Role: {doc.role}")
-            if doc.sollicitation:
-                parts.append(f"Solicitation: {doc.sollicitation}")
+            if doc.availability is not None:
+                parts.append(f"Availability: {doc.availability}")
             if doc.location:
                 parts.append(f"Location: {doc.location}")
             if doc.url:

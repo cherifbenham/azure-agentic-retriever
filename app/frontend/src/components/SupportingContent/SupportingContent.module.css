@@ -21,6 +21,9 @@
 
 .supportingContentItemHeader {
     margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
 }
 
 .supportingContentItemText {
@@ -34,4 +37,14 @@
     height: auto;
     display: block;
     margin: 0 auto; /* center if narrower */
+}
+
+.availabilityBadge {
+    background: rgb(232, 248, 239);
+    color: rgb(17, 94, 59);
+    border: 1px solid rgb(187, 230, 204);
+    border-radius: 999px;
+    font-size: 0.75em;
+    padding: 0.15em 0.6em;
+    white-space: nowrap;
 }

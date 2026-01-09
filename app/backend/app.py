@@ -566,8 +566,9 @@ async def setup_clients():
     )
     current_app.config[CONFIG_GLOBAL_BLOB_MANAGER] = global_blob_manager
 
-    # Set up authentication helper
+    # Set up authentication helper + detect scoring profile support
     search_index = None
+    search_scoring_profile = None
     if AZURE_USE_AUTHENTICATION:
         current_app.logger.info("AZURE_USE_AUTHENTICATION is true, setting up search index client")
         search_index_client = SearchIndexClient(
@@ -575,7 +576,23 @@ async def setup_clients():
             credential=azure_credential,
         )
         search_index = await search_index_client.get_index(AZURE_SEARCH_INDEX)
+        scoring_profiles = search_index.scoring_profiles or []
+        if any(profile.name == "availabilityBoost" for profile in scoring_profiles):
+            search_scoring_profile = "availabilityBoost"
         await search_index_client.close()
+    else:
+        try:
+            search_index_client = SearchIndexClient(
+                endpoint=AZURE_SEARCH_ENDPOINT,
+                credential=azure_credential,
+            )
+            search_index = await search_index_client.get_index(AZURE_SEARCH_INDEX)
+            scoring_profiles = search_index.scoring_profiles or []
+            if any(profile.name == "availabilityBoost" for profile in scoring_profiles):
+                search_scoring_profile = "availabilityBoost"
+            await search_index_client.close()
+        except Exception as exc:
+            current_app.logger.warning("Unable to inspect search index for scoring profiles: %s", exc)
     auth_helper = AuthenticationHelper(
         search_index=search_index,
         use_authentication=AZURE_USE_AUTHENTICATION,
@@ -719,6 +736,7 @@ async def setup_clients():
     if AGENTIC_KNOWLEDGEBASE_REASONING_EFFORT == "minimal" and current_app.config[CONFIG_WEB_SOURCE_ENABLED]:
         raise ValueError("Web source cannot be used with minimal retrieval reasoning effort")
     current_app.config[CONFIG_SHAREPOINT_SOURCE_ENABLED] = USE_SHAREPOINT_SOURCE
+    current_app.config["search_scoring_profile"] = search_scoring_profile
 
     prompt_manager = PromptyManager()
 
@@ -754,6 +772,7 @@ async def setup_clients():
         use_web_source=current_app.config[CONFIG_WEB_SOURCE_ENABLED],
         use_sharepoint_source=current_app.config[CONFIG_SHAREPOINT_SOURCE_ENABLED],
         retrieval_reasoning_effort=AGENTIC_KNOWLEDGEBASE_REASONING_EFFORT,
+        search_scoring_profile=search_scoring_profile,
     )
 
     # ChatReadRetrieveReadApproach is used by /chat for multi-turn conversation
@@ -786,6 +805,7 @@ async def setup_clients():
         use_web_source=current_app.config[CONFIG_WEB_SOURCE_ENABLED],
         use_sharepoint_source=current_app.config[CONFIG_SHAREPOINT_SOURCE_ENABLED],
         retrieval_reasoning_effort=AGENTIC_KNOWLEDGEBASE_REASONING_EFFORT,
+        search_scoring_profile=search_scoring_profile,
     )
 
 

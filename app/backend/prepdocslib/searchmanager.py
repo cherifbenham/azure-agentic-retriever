@@ -494,7 +494,7 @@ class SearchManager:
                 "email",
                 "practice",
                 "role",
-                "sollicitation",
+                "availability",
                 "location",
                 "url",
             ]

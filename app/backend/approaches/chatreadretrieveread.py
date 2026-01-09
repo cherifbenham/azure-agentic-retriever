@@ -65,6 +65,7 @@ class ChatReadRetrieveReadApproach(Approach):
         use_web_source: bool = False,
         use_sharepoint_source: bool = False,
         retrieval_reasoning_effort: Optional[str] = None,
+        search_scoring_profile: Optional[str] = None,
     ):
         self.search_client = search_client
         self.search_index_name = search_index_name
@@ -95,6 +96,7 @@ class ChatReadRetrieveReadApproach(Approach):
         self.image_embeddings_client = image_embeddings_client
         self.global_blob_manager = global_blob_manager
         self.user_blob_manager = user_blob_manager
+        self.search_scoring_profile = search_scoring_profile
         # Track whether web source retrieval is enabled for this deployment; overrides may only disable it.
         self.web_source_enabled = use_web_source
         self.use_sharepoint_source = use_sharepoint_source

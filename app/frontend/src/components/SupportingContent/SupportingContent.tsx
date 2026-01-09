@@ -19,7 +19,12 @@ export const SupportingContent = ({ supportingContent }: Props) => {
                 const parsed = parseSupportingContentItem(c);
                 return (
                     <li className={styles.supportingContentItem} key={`supporting-content-text-${ind}`}>
-                        <h4 className={styles.supportingContentItemHeader}>{parsed.title}</h4>
+                        <h4 className={styles.supportingContentItemHeader}>
+                            {parsed.title}
+                            {parsed.availability && (
+                                <span className={styles.availabilityBadge}>{`Availability ${parsed.availability}`}</span>
+                            )}
+                        </h4>
                         <p className={styles.supportingContentItemText} dangerouslySetInnerHTML={{ __html: parsed.content }} />
                     </li>
                 );

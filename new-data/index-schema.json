@@ -35,8 +35,8 @@
       "facetable": false
     },
     {
-      "name": "sollicitation",
-      "type": "Edm.String",
+      "name": "availability",
+      "type": "Edm.Double",
       "searchable": false,
       "filterable": true,
       "sortable": true,

@@ -13,7 +13,12 @@ from azure.search.documents.indexes.models import (
     BinaryQuantizationCompression,
     HnswAlgorithmConfiguration,
     HnswParameters,
+    MagnitudeScoringFunction,
+    MagnitudeScoringParameters,
     RescoringOptions,
+    ScoringFunctionAggregation,
+    ScoringFunctionInterpolation,
+    ScoringProfile,
     SearchField,
     SearchFieldDataType,
     SearchIndex,
@@ -150,6 +155,25 @@ def build_vector_config(
     return embedding_field, vector_search, text_vectorizer, text_vector_algorithm
 
 
+def build_availability_scoring_profile(field_name: str) -> ScoringProfile:
+    return ScoringProfile(
+        name="availabilityBoost",
+        function_aggregation=ScoringFunctionAggregation.SUM,
+        functions=[
+            MagnitudeScoringFunction(
+                field_name=field_name,
+                boost=2.0,
+                interpolation=ScoringFunctionInterpolation.LINEAR,
+                parameters=MagnitudeScoringParameters(
+                    boosting_range_start=0,
+                    boosting_range_end=1,
+                    should_boost_beyond_range_by_constant=True,
+                ),
+            )
+        ],
+    )
+
+
 async def create_or_update_index(
     search_info,
     schema_fields: list[SearchField],
@@ -157,6 +181,7 @@ async def create_or_update_index(
     vector_search: VectorSearch,
     vectorizer: Optional[AzureOpenAIVectorizer],
     vector_algorithm: HnswAlgorithmConfiguration,
+    availability_scoring_profile: Optional[ScoringProfile] = None,
 ) -> None:
     index_name = search_info.index_name
     async with search_info.create_search_index_client() as search_index_client:
@@ -167,6 +192,7 @@ async def create_or_update_index(
                 name=index_name,
                 fields=[*schema_fields, embedding_field],
                 vector_search=vector_search,
+                scoring_profiles=[availability_scoring_profile] if availability_scoring_profile else None,
             )
             await search_index_client.create_index(index)
             return
@@ -185,6 +211,13 @@ async def create_or_update_index(
             embedding_field.stored = True
             existing_index.fields.append(embedding_field)
             update_required = True
+
+        if availability_scoring_profile:
+            existing_profiles = existing_index.scoring_profiles or []
+            if not any(profile.name == availability_scoring_profile.name for profile in existing_profiles):
+                existing_profiles.append(availability_scoring_profile)
+                existing_index.scoring_profiles = existing_profiles
+                update_required = True
 
         if existing_index.vector_search is None:
             existing_index.vector_search = vector_search
@@ -365,6 +398,9 @@ async def main() -> None:
             logger.info("Replacing schema field %s with vector-enabled field", embedding_field_name)
             schema_fields = [field for field in schema_fields if field.name != embedding_field_name]
             field_types.pop(embedding_field_name, None)
+        availability_scoring_profile = None
+        if "availability" in field_types:
+            availability_scoring_profile = build_availability_scoring_profile("availability")
         embedding_field, vector_search, vectorizer, vector_algorithm = build_vector_config(
             embeddings=embeddings_service,
             embedding_field_name=embedding_field_name,
@@ -378,6 +414,7 @@ async def main() -> None:
             vector_search=vector_search,
             vectorizer=vectorizer,
             vector_algorithm=vector_algorithm,
+            availability_scoring_profile=availability_scoring_profile,
         )
 
         with open(args.data, "r", encoding="utf-8") as data_file:

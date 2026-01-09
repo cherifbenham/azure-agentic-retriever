@@ -166,3 +166,4 @@ local.settings.json
 *.crt
 *.cer
 NEXT-STEPS.MD
+availability.csv
