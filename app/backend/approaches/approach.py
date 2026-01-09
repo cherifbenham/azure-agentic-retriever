@@ -241,6 +241,7 @@ class GPTReasoningModelSupport:
 
 
 class Approach(ABC):
+    EXPERT_RESULTS_LIMIT = 2
     # List of GPT reasoning models support
     GPT_REASONING_MODELS = {
         "o1": GPTReasoningModelSupport(streaming=False, minimal_effort=False),
@@ -312,6 +313,27 @@ class Approach(ABC):
         if exclude_category:
             filters.append("category ne '{}'".format(exclude_category.replace("'", "''")))
         return None if not filters else " and ".join(filters)
+
+    def get_expert_limit(self, overrides: dict[str, Any]) -> int:
+        limit = overrides.get("max_experts")
+        if limit is None:
+            return self.EXPERT_RESULTS_LIMIT
+        try:
+            limit_int = int(limit)
+        except (TypeError, ValueError):
+            return self.EXPERT_RESULTS_LIMIT
+        return limit_int if limit_int > 0 else self.EXPERT_RESULTS_LIMIT
+
+    def limit_documents(self, documents: list[Document], limit: int) -> list[Document]:
+        if limit <= 0:
+            return documents
+        return documents[:limit]
+
+    def limit_external_results(self, results: list[Any], limit: int) -> list[Any]:
+        if limit <= 0:
+            return results
+        return results[:limit]
+
 
     async def search(
         self,

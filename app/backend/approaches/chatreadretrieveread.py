@@ -401,6 +401,7 @@ class ChatReadRetrieveReadApproach(Approach):
             use_query_rewriting,
             access_token,
         )
+        results = self.limit_documents(results, self.get_expert_limit(overrides))
 
         # STEP 3: Generate a contextual and content specific answer using the search results and chat history
         data_points = await self.get_sources_content(
@@ -486,6 +487,9 @@ class ChatReadRetrieveReadApproach(Approach):
             use_sharepoint_source=effective_sharepoint_source,
             retrieval_reasoning_effort=retrieval_reasoning_effort,
         )
+        agentic_results.documents = self.limit_documents(
+            agentic_results.documents, self.get_expert_limit(overrides)
+        )
 
         data_points = await self.get_sources_content(
             agentic_results.documents,
@@ -493,8 +497,12 @@ class ChatReadRetrieveReadApproach(Approach):
             include_text_sources=send_text_sources,
             download_image_sources=send_image_sources,
             user_oid=auth_claims.get("oid"),
-            web_results=agentic_results.web_results,
-            sharepoint_results=agentic_results.sharepoint_results,
+            web_results=self.limit_external_results(
+                agentic_results.web_results, self.get_expert_limit(overrides)
+            ),
+            sharepoint_results=self.limit_external_results(
+                agentic_results.sharepoint_results, self.get_expert_limit(overrides)
+            ),
         )
 
         return ExtraInfo(

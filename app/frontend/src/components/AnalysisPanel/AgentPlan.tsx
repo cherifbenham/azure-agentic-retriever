@@ -118,11 +118,16 @@ export const AgentPlan: React.FC<Props> = ({ queryPlan, onEffortExtracted, onCit
     // Helper to get results for a specific step
     const getResultsForStep = (step: QueryPlanStep): any[] => {
         if (!results || results.length === 0) return [];
+        const stepId = step?.id !== undefined && step?.id !== null ? String(step.id) : undefined;
         const stepQuery = getStepQuery(step);
-        if (!stepQuery) return [];
 
-        // Filter by both query and step type, then de-duplicate by filename
-        const filtered = results.filter(result => result.activity?.query === stepQuery && result.type == step.type);
+        // Prefer matching by activity id; fall back to query match if needed.
+        let filtered = results.filter(result => stepId && String(result.activity?.id) === stepId);
+        if (filtered.length === 0 && stepQuery) {
+            filtered = results.filter(result => result.activity?.query === stepQuery);
+        }
+
+        // De-duplicate by filename/URL
         const uniqueMap = new Map(filtered.map(r => [r.sourcepage || r.web_url || r.url, r]));
         return Array.from(uniqueMap.values());
     };
