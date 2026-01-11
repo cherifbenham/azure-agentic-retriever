@@ -1,5 +1,6 @@
 import os
 import time
+from uuid import uuid4
 from typing import Any
 
 from azure.cosmos.aio import ContainerProxy, CosmosClient
@@ -7,6 +8,7 @@ from azure.identity.aio import AzureDeveloperCliCredential, ManagedIdentityCrede
 from quart import Blueprint, current_app, jsonify, make_response, request
 
 from config import (
+    CONFIG_AUTH_CLIENT,
     CONFIG_CHAT_HISTORY_COSMOS_ENABLED,
     CONFIG_COSMOS_HISTORY_CLIENT,
     CONFIG_COSMOS_HISTORY_CONTAINER,
@@ -17,6 +19,39 @@ from decorators import authenticated
 from error import error_response
 
 chat_history_cosmosdb_bp = Blueprint("chat_history_cosmos", __name__, static_folder="static")
+ANONYMOUS_OID_COOKIE = "anon_oid"
+ANONYMOUS_OID_HEADER = "x-anon-oid"
+
+
+def get_anonymous_oid() -> tuple[str, str | None]:
+    anon_oid = request.cookies.get(ANONYMOUS_OID_COOKIE) or request.headers.get(ANONYMOUS_OID_HEADER)
+    if anon_oid:
+        return anon_oid, None
+    new_oid = str(uuid4())
+    return new_oid, new_oid
+
+
+def get_effective_entra_oid(auth_claims: dict[str, Any]) -> tuple[str | None, str | None]:
+    entra_oid = auth_claims.get("oid")
+    if entra_oid:
+        return entra_oid, None
+    auth_helper = current_app.config[CONFIG_AUTH_CLIENT]
+    if getattr(auth_helper, "use_authentication", False):
+        return None, None
+    return get_anonymous_oid()
+
+
+def attach_anonymous_cookie(response, cookie_value: str | None):
+    if cookie_value:
+        response.set_cookie(
+            ANONYMOUS_OID_COOKIE,
+            cookie_value,
+            max_age=60 * 60 * 24 * 30,
+            httponly=True,
+            samesite="Lax",
+            secure=request.scheme == "https",
+        )
+    return response
 
 
 @chat_history_cosmosdb_bp.post("/chat_history")
@@ -29,7 +64,7 @@ async def post_chat_history(auth_claims: dict[str, Any]):
     if not container:
         return jsonify({"error": "Chat history not enabled"}), 400
 
-    entra_oid = auth_claims.get("oid")
+    entra_oid, anon_cookie_value = get_effective_entra_oid(auth_claims)
     if not entra_oid:
         return jsonify({"error": "User OID not found"}), 401
 
@@ -71,7 +106,9 @@ async def post_chat_history(auth_claims: dict[str, Any]):
             ("upsert", (message_pair_item,)) for message_pair_item in message_pair_items
         ]
         await container.execute_item_batch(batch_operations=batch_operations, partition_key=[entra_oid, session_id])
-        return jsonify({}), 201
+        response = jsonify({})
+        response.status_code = 201
+        return attach_anonymous_cookie(response, anon_cookie_value)
     except Exception as error:
         return error_response(error, "/chat_history")
 
@@ -86,7 +123,7 @@ async def get_chat_history_sessions(auth_claims: dict[str, Any]):
     if not container:
         return jsonify({"error": "Chat history not enabled"}), 400
 
-    entra_oid = auth_claims.get("oid")
+    entra_oid, anon_cookie_value = get_effective_entra_oid(auth_claims)
     if not entra_oid:
         return jsonify({"error": "User OID not found"}), 401
 
@@ -123,7 +160,9 @@ async def get_chat_history_sessions(auth_claims: dict[str, Any]):
         except StopAsyncIteration:
             continuation_token = None
 
-        return jsonify({"sessions": sessions, "continuation_token": continuation_token}), 200
+        response = jsonify({"sessions": sessions, "continuation_token": continuation_token})
+        response.status_code = 200
+        return attach_anonymous_cookie(response, anon_cookie_value)
 
     except Exception as error:
         return error_response(error, "/chat_history/sessions")
@@ -139,7 +178,7 @@ async def get_chat_history_session(auth_claims: dict[str, Any], session_id: str)
     if not container:
         return jsonify({"error": "Chat history not enabled"}), 400
 
-    entra_oid = auth_claims.get("oid")
+    entra_oid, anon_cookie_value = get_effective_entra_oid(auth_claims)
     if not entra_oid:
         return jsonify({"error": "User OID not found"}), 401
 
@@ -155,16 +194,15 @@ async def get_chat_history_session(auth_claims: dict[str, Any], session_id: str)
             async for item in page:
                 message_pairs.append([item["question"], item["response"]])
 
-        return (
-            jsonify(
-                {
-                    "id": session_id,
-                    "entra_oid": entra_oid,
-                    "answers": message_pairs,
-                }
-            ),
-            200,
+        response = jsonify(
+            {
+                "id": session_id,
+                "entra_oid": entra_oid,
+                "answers": message_pairs,
+            }
         )
+        response.status_code = 200
+        return attach_anonymous_cookie(response, anon_cookie_value)
     except Exception as error:
         return error_response(error, f"/chat_history/sessions/{session_id}")
 
@@ -179,7 +217,7 @@ async def delete_chat_history_session(auth_claims: dict[str, Any], session_id: s
     if not container:
         return jsonify({"error": "Chat history not enabled"}), 400
 
-    entra_oid = auth_claims.get("oid")
+    entra_oid, anon_cookie_value = get_effective_entra_oid(auth_claims)
     if not entra_oid:
         return jsonify({"error": "User OID not found"}), 401
 
@@ -197,7 +235,8 @@ async def delete_chat_history_session(auth_claims: dict[str, Any], session_id: s
 
         batch_operations = [("delete", (id,)) for id in ids_to_delete]
         await container.execute_item_batch(batch_operations=batch_operations, partition_key=[entra_oid, session_id])
-        return await make_response("", 204)
+        response = await make_response("", 204)
+        return attach_anonymous_cookie(response, anon_cookie_value)
     except Exception as error:
         return error_response(error, f"/chat_history/sessions/{session_id}")
 

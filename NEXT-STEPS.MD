@@ -12,3 +12,6 @@
 * Rajouter "**Enrichir Mon Profil**"
 * Rajouter "BD Missions Powerpoint"
 * Mettre à jour profil **de la UI**
+* Chat history Cosmos:
+  * fallback anonyme OK (cookie `anon_oid`) quand l'auth est off
+  * pour l'auth complète: donner "Search Index Data Owner/Contributor" à `cwyod-aca-identity` sur le service Search + configurer l'app `pointages-app` (redirect `/redirect`, scope `access_as_user`)
