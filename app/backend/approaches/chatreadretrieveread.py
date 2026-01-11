@@ -343,6 +343,9 @@ class ChatReadRetrieveReadApproach(Approach):
         use_semantic_ranker = True if overrides.get("semantic_ranker") else False
         use_semantic_captions = True if overrides.get("semantic_captions") else False
         use_query_rewriting = True if overrides.get("query_rewriting") else False
+        original_user_query = messages[-1]["content"]
+        if not isinstance(original_user_query, str):
+            raise ValueError("The most recent message content must be a string.")
         top = overrides.get("top", 5)
         minimum_search_score = overrides.get("minimum_search_score", 0.0)
         minimum_reranker_score = overrides.get("minimum_reranker_score", 0.0)
@@ -354,10 +357,6 @@ class ChatReadRetrieveReadApproach(Approach):
         search_image_embeddings = (
             overrides.get("search_image_embeddings", self.multimodal_enabled) and self.multimodal_enabled
         )
-
-        original_user_query = messages[-1]["content"]
-        if not isinstance(original_user_query, str):
-            raise ValueError("The most recent message content must be a string.")
 
         # STEP 1: Generate an optimized keyword search query based on the chat history and the last question
 

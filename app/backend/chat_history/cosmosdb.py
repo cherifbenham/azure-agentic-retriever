@@ -1,7 +1,7 @@
 import os
 import time
-from uuid import uuid4
 from typing import Any
+from uuid import uuid4
 
 from azure.cosmos.aio import ContainerProxy, CosmosClient
 from azure.identity.aio import AzureDeveloperCliCredential, ManagedIdentityCredential

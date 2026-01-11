@@ -1,13 +1,14 @@
-import base64
-import json
-import logging
-import time
-import re
 from abc import ABC
+import base64
 from collections.abc import AsyncGenerator, Awaitable
 from dataclasses import asdict, dataclass, field
+import json
+import logging
+import re
+import time
 from typing import Any, Optional, TypedDict, cast
 
+from azure.core.exceptions import HttpResponseError
 from azure.search.documents.aio import SearchClient
 from azure.search.documents.knowledgebases.aio import KnowledgeBaseRetrievalClient
 from azure.search.documents.knowledgebases.models import (
@@ -36,7 +37,6 @@ from azure.search.documents.models import (
     VectorizedQuery,
     VectorQuery,
 )
-from azure.core.exceptions import HttpResponseError
 from openai import AsyncOpenAI, AsyncStream
 from openai.types import CompletionUsage
 from openai.types.chat import (

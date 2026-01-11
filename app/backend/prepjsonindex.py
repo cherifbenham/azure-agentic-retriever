@@ -55,7 +55,7 @@ async def check_search_service_connectivity(search_service: str) -> bool:
 
 
 def load_schema(schema_path: str) -> dict[str, Any]:
-    with open(schema_path, "r", encoding="utf-8") as schema_file:
+    with open(schema_path, encoding="utf-8") as schema_file:
         schema = json.load(schema_file)
     if not isinstance(schema, dict):
         raise ValueError("Schema file must contain a JSON object")
@@ -417,7 +417,7 @@ async def main() -> None:
             availability_scoring_profile=availability_scoring_profile,
         )
 
-        with open(args.data, "r", encoding="utf-8") as data_file:
+        with open(args.data, encoding="utf-8") as data_file:
             records = json.load(data_file)
         if not isinstance(records, list):
             raise ValueError("Data file must contain a JSON array")
