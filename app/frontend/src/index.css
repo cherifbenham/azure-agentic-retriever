@@ -1,22 +1,40 @@
+:root {
+    --color-bg: #0b1530;
+    --color-bg-strong: #0f1f3d;
+    --color-ink: #eaf1ff;
+    --color-ink-muted: #aebedb;
+    --color-ink-dark: #18253d;
+    --color-ink-dark-muted: #5a6a85;
+    --color-card: #162b57;
+    --color-card-strong: #1f3f7d;
+    --color-surface: #f7f9fd;
+    --color-surface-muted: #e8eff9;
+    --color-border: rgba(255, 255, 255, 0.14);
+    --color-border-light: #d6deeb;
+    --color-accent: #4ed3b5;
+    --color-accent-strong: #2aa48a;
+    --color-accent-soft: rgba(78, 211, 181, 0.18);
+    --color-gold: #e0c27a;
+    --color-link: #82c7ff;
+    --shadow-soft: 0 1.25rem 2.5rem rgba(3, 12, 29, 0.35);
+    --shadow-float: 0 1.5rem 3rem rgba(3, 12, 29, 0.45);
+    --radius-lg: 1.8rem;
+    --radius-md: 1.1rem;
+    --radius-sm: 0.8rem;
+    --font-title: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+    --font-body: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", "SFMono-Regular", ui-monospace, monospace;
+}
+
 * {
     box-sizing: border-box;
 }
 
 html {
-    background: #f2f2f2;
+    background: var(--color-bg);
     font-size: 12px; /* Root font size for 320px width screens */
-    font-family:
-        "Segoe UI",
-        -apple-system,
-        BlinkMacSystemFont,
-        "Roboto",
-        "Oxygen",
-        "Ubuntu",
-        "Cantarell",
-        "Fira Sans",
-        "Droid Sans",
-        "Helvetica Neue",
-        sans-serif;
+    font-family: var(--font-body);
+    color: var(--color-ink);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -25,6 +43,12 @@ body {
     height: 100%;
     margin: 0;
     padding: 0;
+    background: linear-gradient(180deg, #0b1530 0%, #0a1a33 45%, #071426 100%);
+    color: var(--color-ink);
+}
+
+a {
+    color: var(--color-link);
 }
 
 #root {

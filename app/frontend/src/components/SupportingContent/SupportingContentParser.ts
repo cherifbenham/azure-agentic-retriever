@@ -15,8 +15,9 @@ export function parseSupportingContentItem(item: string): ParsedSupportingConten
     const availabilityMatch = rawContent.match(/Availability:\\s*([0-9.]+)/i);
     let content = rawContent;
     if (availabilityMatch) {
-        content = rawContent.replace(availabilityMatch[0], "").replace(/;\\s*\\.?$/, "");
+        content = content.replace(availabilityMatch[0], "").replace(/;\\s*\\.?$/, "");
     }
+    content = boldMetadataLabels(content);
     const sanitizedContent = DOMPurify.sanitize(content);
     let availability: string | undefined;
     if (availabilityMatch) {
@@ -33,4 +34,54 @@ export function parseSupportingContentItem(item: string): ParsedSupportingConten
         content: sanitizedContent,
         availability
     };
+}
+
+const LABELS_TO_BOLD = [
+    "Booking URL",
+    "Booking Url",
+    "URL",
+    "Email",
+    "Practice",
+    "Pratique",
+    "Role",
+    "Rôle",
+    "Availability",
+    "Disponibilité",
+    "Location",
+    "Localisation",
+    "Category",
+    "Catégorie",
+    "Description",
+    "Compétences techniques",
+    "Compétences supplémentaires",
+    "Compétences additionnelles",
+    "Compétences",
+    "Competences",
+    "Skills",
+    "Technologies",
+    "Techniques",
+    "Méthodes",
+    "Methodes",
+    "Méthodologies",
+    "Methodologies",
+    "Outils collaboratifs",
+    "Outils et plateformes",
+    "Outils et bibliothèques",
+    "Outils",
+    "Secteur d'activité",
+    "Secteurs",
+    "Secteur",
+    "Domaines de pratique",
+    "Domaines",
+    "Industry"
+];
+
+const labelsByLength = [...LABELS_TO_BOLD].sort((a, b) => b.length - a.length);
+
+function boldMetadataLabels(input: string): string {
+    return labelsByLength.reduce((text, label) => {
+        const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const pattern = new RegExp(`(^|[\\n\\r\\s;,.])(${escaped})\\s*:`, "gi");
+        return text.replace(pattern, (_match, prefix, matched) => `${prefix}**${matched}:**`);
+    }, input);
 }

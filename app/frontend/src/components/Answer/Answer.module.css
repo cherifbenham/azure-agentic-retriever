@@ -1,11 +1,11 @@
 .answerContainer {
     padding: 1.25em;
-    background: rgb(249, 249, 249);
-    border-radius: 0.5em;
-    box-shadow:
-        0em 0.125em 0.25em rgba(0, 0, 0, 0.14),
-        0em 0em 0.125em rgba(0, 0, 0, 0.12);
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-soft);
     outline: transparent solid 0.0625em;
+    border: 1px solid var(--color-border-light);
+    color: var(--color-ink-dark);
 }
 
 .answerLogo {
@@ -18,13 +18,15 @@
     line-height: 1.375em;
     padding-top: 1em;
     padding-bottom: 1em;
+    color: var(--color-ink-dark);
 }
 
 .answerText h1,
-h2,
-h2 {
+.answerText h2,
+.answerText h3 {
     font-size: 1rem;
     font-weight: bold;
+    font-family: var(--font-title);
 }
 
 .answerText table {
@@ -38,7 +40,7 @@ h2 {
 }
 
 .selected {
-    outline: 0.125em solid rgba(115, 118, 225, 1);
+    outline: 0.125em solid var(--color-accent);
 }
 
 .citationLearnMore {
@@ -53,8 +55,8 @@ h2 {
     text-align: center;
     border-radius: 0.25em;
     padding: 0em 0.5em;
-    background: #d1dbfa;
-    color: #123bb6;
+    background: var(--color-accent-soft);
+    color: var(--color-accent-strong);
     text-decoration: none;
     cursor: pointer;
 }
@@ -79,8 +81,8 @@ h2 {
     text-align: center;
     border-radius: 0.25em;
     padding: 0em 0.5em;
-    background: #e8ebfa;
-    color: black;
+    background: var(--color-card);
+    color: var(--color-ink);
     font-style: italic;
     text-decoration: none;
     cursor: pointer;
@@ -120,8 +122,8 @@ sup {
     min-width: 0.875em;
     height: 0.875em;
     border-radius: 0.1875em;
-    background: #d1dbfa;
-    color: #123bb6;
+    background: var(--color-accent-soft);
+    color: var(--color-accent-strong);
     text-decoration-color: transparent;
     outline: transparent solid 0.0625em;
     cursor: pointer;
@@ -132,10 +134,10 @@ sup {
     align-items: center;
     justify-content: center;
     border-radius: 999px;
-    background: #f4f6ff;
-    color: #123bb6;
+    background: var(--color-accent-soft);
+    color: var(--color-accent-strong);
     font-weight: 600;
-    border: 0.0625em solid #d1dbfa;
+    border: 0.0625em solid rgba(78, 211, 181, 0.3);
 }
 
 .citationStepBadgeInline {
@@ -163,7 +165,7 @@ sup {
     display: flex;
     justify-content: flex-end;
     font-size: 0.75rem;
-    color: #555;
+    color: var(--color-ink-muted);
 }
 
 @keyframes loading {

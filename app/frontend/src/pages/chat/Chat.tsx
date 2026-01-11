@@ -4,7 +4,6 @@ import { Helmet } from "react-helmet-async";
 import { Panel, DefaultButton } from "@fluentui/react";
 import readNDJSONStream from "ndjson-readablestream";
 
-import appLogo from "../../assets/applogo.svg";
 import styles from "./Chat.module.css";
 
 import { chatApi, configApi, RetrievalMode, ChatAppResponse, ChatAppResponseOrError, ChatAppRequest, ResponseMessage, SpeechConfig } from "../../api";
@@ -520,13 +519,59 @@ const Chat = () => {
                 <div className={styles.chatContainer}>
                     {!lastQuestionRef.current ? (
                         <div className={styles.chatEmptyState}>
-                            <img src={appLogo} alt="App logo" width="120" height="120" />
-
-                            <h1 className={styles.chatEmptyStateTitle}>{t("chatEmptyStateTitle")}</h1>
-                            <h2 className={styles.chatEmptyStateSubtitle}>{t("chatEmptyStateSubtitle")}</h2>
+                            <div className={styles.heroLayout}>
+                                <div className={styles.heroLeft}>
+                                    <div className={styles.heroBadge}>{t("heroBadge")}</div>
+                                    <div className={styles.heroCopy}>
+                                        <h1 className={styles.chatEmptyStateTitle}>{t("chatEmptyStateTitle")}</h1>
+                                        <p className={styles.chatEmptyStateSubtitle}>{t("chatEmptyStateSubtitle")}</p>
+                                    </div>
+                                    <div className={styles.heroProgress}>
+                                        <div className={styles.heroProgressHeader}>
+                                            <span>{t("heroProgressLabel")}</span>
+                                            <span>{t("heroProgressValue")}</span>
+                                        </div>
+                                        <div className={styles.heroProgressTrack}>
+                                            <span className={styles.heroProgressFill} />
+                                        </div>
+                                    </div>
+                                    <div className={styles.heroChips}>
+                                        <span className={styles.heroChip}>{t("heroChip1")}</span>
+                                        <span className={styles.heroChip}>{t("heroChip2")}</span>
+                                        <span className={styles.heroChip}>{t("heroChip3")}</span>
+                                        <span className={styles.heroChip}>{t("heroChip4")}</span>
+                                        <span className={styles.heroChip}>{t("heroChip5")}</span>
+                                        <span className={styles.heroChip}>{t("heroChip6")}</span>
+                                    </div>
+                                </div>
+                                <div className={styles.heroActions}>
+                                    <button
+                                        type="button"
+                                        className={`${styles.heroAction} ${styles.heroActionPrimary}`}
+                                        onClick={() => onExampleClicked(t("defaultExamples.1"))}
+                                    >
+                                        {t("heroActionPrimary")}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`${styles.heroAction} ${styles.heroActionSecondary}`}
+                                        onClick={() => onExampleClicked(t("defaultExamples.2"))}
+                                    >
+                                        {t("heroActionSecondary")}
+                                    </button>
+                                    <a className={`${styles.heroAction} ${styles.heroActionTertiary}`} href="#/about">
+                                        {t("heroActionTertiary")}
+                                    </a>
+                                    <a className={`${styles.heroAction} ${styles.heroActionQuaternary}`} href="#/contact">
+                                        {t("heroActionQuaternary")}
+                                    </a>
+                                </div>
+                            </div>
                             {showLanguagePicker && <LanguagePicker onLanguageChange={newLang => i18n.changeLanguage(newLang)} />}
-
-                            <ExampleList onExampleClicked={onExampleClicked} useMultimodalAnswering={showMultimodalOptions} />
+                            <div className={styles.heroExamples}>
+                                <div className={styles.heroExamplesLabel}>{t("heroExamplesLabel")}</div>
+                                <ExampleList onExampleClicked={onExampleClicked} useMultimodalAnswering={showMultimodalOptions} />
+                            </div>
                         </div>
                     ) : (
                         <div className={styles.chatMessageStream}>

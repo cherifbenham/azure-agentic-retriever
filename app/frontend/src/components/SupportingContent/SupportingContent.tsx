@@ -1,4 +1,5 @@
-import DOMPurify from "dompurify";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 import { DataPoints } from "../../api";
 import { parseSupportingContentItem } from "./SupportingContentParser";
@@ -27,7 +28,9 @@ export const SupportingContent = ({ supportingContent }: Props) => {
                                 <span className={styles.availabilityBadge}>{`Availability ${parsed.availability}`}</span>
                             )}
                         </h4>
-                        <p className={styles.supportingContentItemText} dangerouslySetInnerHTML={{ __html: parsed.content }} />
+                        <ReactMarkdown className={styles.supportingContentItemText} remarkPlugins={[remarkGfm]}>
+                            {parsed.content}
+                        </ReactMarkdown>
                     </li>
                 );
             })}

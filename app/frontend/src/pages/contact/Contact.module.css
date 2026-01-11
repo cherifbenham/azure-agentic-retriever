@@ -1,0 +1,119 @@
+.page {
+    flex: 1;
+    padding: 2.5rem 1.5rem 4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.hero {
+    background: linear-gradient(140deg, #0f214a 0%, #17356b 55%, #1f3f7d 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+    box-shadow: var(--shadow-soft);
+    color: var(--color-ink);
+}
+
+.eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-ink-muted);
+    margin: 0 0 1rem;
+}
+
+.title {
+    font-family: var(--font-body);
+    font-size: 3rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+}
+
+.subtitle {
+    margin: 0;
+    color: var(--color-ink-muted);
+    font-size: 1.2rem;
+    max-width: 40rem;
+}
+
+.actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+}
+
+.card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    padding: 1.75rem;
+    box-shadow: var(--shadow-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    color: var(--color-ink-dark);
+}
+
+.card h3 {
+    margin: 0;
+    font-family: var(--font-body);
+    font-weight: 600;
+}
+
+.card p {
+    margin: 0;
+    color: var(--color-ink-dark-muted);
+}
+
+.primaryButton,
+.secondaryButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 999px;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid transparent;
+}
+
+.primaryButton {
+    background: var(--color-accent);
+    color: #ffffff;
+    box-shadow: 0 0.75rem 1.5rem rgba(8, 20, 36, 0.15);
+}
+
+.primaryButton:hover {
+    background: var(--color-accent-strong);
+}
+
+.secondaryButton {
+    background: transparent;
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+.secondaryButton:hover {
+    background: var(--color-accent-soft);
+}
+
+.detail {
+    padding: 1rem 1.5rem;
+    border-left: 3px solid var(--color-gold);
+    background: var(--color-surface-muted);
+    color: var(--color-ink-dark);
+}
+
+@media (min-width: 992px) {
+    .page {
+        padding: 3rem 2rem 5rem;
+    }
+
+    .title {
+        font-size: 3.5rem;
+    }
+}

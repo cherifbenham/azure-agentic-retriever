@@ -1,0 +1,98 @@
+.page {
+    flex: 1;
+    padding: 2.5rem 1.5rem 4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.hero {
+    background: linear-gradient(140deg, #0f214a 0%, #17356b 55%, #1f3f7d 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+    box-shadow: var(--shadow-soft);
+    color: var(--color-ink);
+}
+
+.eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    margin: 0 0 1rem;
+}
+
+.title {
+    font-family: var(--font-title);
+    font-size: 3rem;
+    margin: 0 0 0.5rem;
+}
+
+.subtitle {
+    margin: 0;
+    color: var(--color-ink-muted);
+    font-size: 1.2rem;
+    max-width: 40rem;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+}
+
+.card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-soft);
+    color: var(--color-ink-dark);
+}
+
+.card h3 {
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+    font-family: var(--font-title);
+}
+
+.card p {
+    margin: 0;
+    color: var(--color-ink-dark-muted);
+}
+
+.cta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+    padding: 1.5rem 2rem;
+    border-radius: var(--radius-md);
+    background: var(--color-card);
+    border: 1px dashed rgba(255, 255, 255, 0.18);
+    color: var(--color-ink);
+}
+
+.ctaLink {
+    color: var(--color-accent);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.ctaLink:hover {
+    text-decoration: underline;
+}
+
+@media (min-width: 992px) {
+    .page {
+        padding: 3rem 2rem 5rem;
+    }
+
+    .title {
+        font-size: 3.5rem;
+    }
+}

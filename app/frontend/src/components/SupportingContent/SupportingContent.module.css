@@ -8,8 +8,8 @@
 
 .supportingContentItem {
     word-break: break-word;
-    background: rgb(249, 249, 249);
-    border-radius: 0.5em;
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
     box-shadow:
         rgb(0 0 0 / 5%) 0px 0px 0px 0.0625em,
         rgb(0 0 0 / 10%) 0px 0.125em 0.1875em 0px;
@@ -17,6 +17,8 @@
     display: flex;
     flex-direction: column;
     padding: 1.25em;
+    color: var(--color-ink-dark);
+    border: 1px solid var(--color-border-light);
 }
 
 .supportingContentItemHeader {
@@ -29,6 +31,33 @@
 .supportingContentItemText {
     margin-bottom: 0;
     font-weight: 300;
+    color: var(--color-ink-dark);
+    line-height: 1.6;
+}
+
+.supportingContentItemText p {
+    margin: 0 0 0.75em;
+}
+
+.supportingContentItemText p:last-child {
+    margin-bottom: 0;
+}
+
+.supportingContentItemText ul,
+.supportingContentItemText ol {
+    margin: 0.5em 0 0.75em 1.25em;
+    padding: 0;
+}
+
+.supportingContentItemText strong {
+    font-weight: 600;
+}
+
+.supportingContentItemText code {
+    background: var(--color-surface-muted);
+    padding: 0.1em 0.35em;
+    border-radius: 0.35em;
+    font-family: var(--font-mono);
 }
 
 .supportingContentItemImage {
@@ -40,9 +69,9 @@
 }
 
 .availabilityBadge {
-    background: rgb(232, 248, 239);
-    color: rgb(17, 94, 59);
-    border: 1px solid rgb(187, 230, 204);
+    background: var(--color-accent-soft);
+    color: var(--color-accent-strong);
+    border: 1px solid rgba(78, 211, 181, 0.35);
     border-radius: 999px;
     font-size: 0.75em;
     padding: 0.15em 0.6em;

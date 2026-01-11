@@ -26,19 +26,195 @@
     justify-content: center;
     align-items: center;
     max-height: 64rem;
-    padding-top: 1rem;
+    padding: 2.75rem 2.5rem;
+    gap: 2rem;
+    background: linear-gradient(140deg, #0f214a 0%, #17356b 55%, #1f3f7d 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    position: relative;
+    overflow: hidden;
+    width: min(100%, 960px);
+}
+
+.chatEmptyState::before {
+    content: "";
+    position: absolute;
+    width: 360px;
+    height: 360px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(82, 199, 255, 0.22), transparent 70%);
+    top: -140px;
+    right: -140px;
+    pointer-events: none;
+}
+
+.heroBadge {
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-ink-muted);
 }
 
 .chatEmptyStateTitle {
-    font-size: 2.75rem;
-    font-weight: 600;
-    margin-top: 0;
-    margin-bottom: 1.875rem;
+    font-size: 3rem;
+    font-weight: 700;
+    font-family: var(--font-body);
+    margin: 0 0 0.5rem;
 }
 
 .chatEmptyStateSubtitle {
+    font-weight: 400;
+    margin: 0;
+    color: var(--color-ink-muted);
+    max-width: 38rem;
+    font-size: 1.1rem;
+}
+
+.heroLayout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    width: 100%;
+    z-index: 1;
+    animation: fadeUp 600ms ease;
+}
+
+.heroLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+    text-align: center;
+}
+
+.heroCopy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.heroProgress {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.heroProgressHeader {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.95rem;
+    color: var(--color-ink-muted);
+}
+
+.heroProgressTrack {
+    width: 100%;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+}
+
+.heroProgressFill {
+    display: block;
+    height: 100%;
+    width: 4%;
+    background: linear-gradient(90deg, #4ed3b5 0%, #68c6ff 100%);
+    border-radius: 999px;
+}
+
+.heroChips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+.heroChip {
+    padding: 0.55rem 1rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    font-size: 0.9rem;
+    color: var(--color-ink);
+    white-space: nowrap;
+}
+
+.heroActions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.heroAction {
+    border-radius: 999px;
+    padding: 0.85rem 1.5rem;
+    border: none;
     font-weight: 600;
-    margin-bottom: 0.625rem;
+    font-size: 1rem;
+    color: white;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 220ms ease, box-shadow 220ms ease;
+}
+
+.heroAction:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-float);
+}
+
+.heroActionPrimary {
+    background: linear-gradient(135deg, #3bb192 0%, #4ed3b5 100%);
+}
+
+.heroActionSecondary {
+    background: linear-gradient(135deg, #c04b4b 0%, #d96a4f 100%);
+}
+
+.heroActionTertiary {
+    background: linear-gradient(135deg, #5e3baa 0%, #7c55d7 100%);
+}
+
+.heroActionQuaternary {
+    background: linear-gradient(135deg, #1c73b8 0%, #2e9fd3 100%);
+}
+
+.heroExamples {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.heroExamplesLabel {
+    font-size: 0.85rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+    text-align: center;
+}
+
+.heroHighlight {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    box-shadow: var(--shadow-soft);
+    text-align: left;
+}
+
+.heroHighlightTitle {
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+}
+
+.heroHighlightBody {
+    color: var(--color-ink-muted);
+    margin: 0;
 }
 
 .chatMessageStream {
@@ -71,7 +247,7 @@
     padding: 1rem;
     width: 100%;
     max-width: 64.25rem;
-    background: #f2f2f2;
+    background: transparent;
 }
 
 .chatAnalysisPanel {
@@ -80,6 +256,12 @@
     max-height: 85vh;
     margin-left: 1.25rem;
     margin-right: 1.25rem;
+    background: var(--color-surface);
+    color: var(--color-ink-dark);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border-light);
+    padding: 1rem 1.25rem;
+    box-shadow: var(--shadow-soft);
 }
 
 .chatSettingsSeparator {
@@ -114,11 +296,33 @@
     }
 
     .chatEmptyState {
-        padding-top: 3.75rem;
+        padding: 3.5rem 4rem;
     }
 
     .chatEmptyStateTitle {
-        font-size: 4rem;
+        font-size: 3.6rem;
+    }
+
+    .heroLayout {
+        grid-template-columns: 2.2fr 1fr;
+        align-items: start;
+    }
+
+    .heroLeft {
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    .heroChips {
+        justify-content: flex-start;
+    }
+
+    .heroExamples {
+        align-items: flex-start;
+    }
+
+    .heroExamplesLabel {
+        text-align: left;
     }
 
     .chatInput {
@@ -142,5 +346,23 @@
     .chatMessageGpt {
         max-width: 80%;
         min-width: 31.25rem;
+    }
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .heroTop,
+    .heroHighlight {
+        animation: none;
     }
 }
