@@ -38,10 +38,13 @@
     font-size: 1.15rem;
     width: 100%;
     padding: 0.75rem 1rem;
-    min-height: 4.5rem;
     color: var(--color-ink);
     text-align: center;
     line-height: 1.4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
 }
 
 .examplesNavList li {
@@ -73,7 +76,7 @@
         font-size: 1.2rem;
         width: 18rem;
         padding: 0.25rem 0.5rem;
-        min-height: 6.25rem;
+        height: 100%;
     }
 
     .example {
