@@ -242,6 +242,7 @@ class GPTReasoningModelSupport:
 
 class Approach(ABC):
     EXPERT_RESULTS_LIMIT = 2
+    AGENTIC_CANDIDATE_LIMIT = 5
     # List of GPT reasoning models support
     GPT_REASONING_MODELS = {
         "o1": GPTReasoningModelSupport(streaming=False, minimal_effort=False),
@@ -370,6 +371,16 @@ class Approach(ABC):
         except (TypeError, ValueError):
             return self.EXPERT_RESULTS_LIMIT
         return limit_int if limit_int > 0 else self.EXPERT_RESULTS_LIMIT
+
+    def get_candidate_limit(self, overrides: dict[str, Any]) -> int:
+        limit = overrides.get("max_candidates")
+        if limit is None:
+            return self.AGENTIC_CANDIDATE_LIMIT
+        try:
+            limit_int = int(limit)
+        except (TypeError, ValueError):
+            return self.AGENTIC_CANDIDATE_LIMIT
+        return limit_int if limit_int > 0 else self.AGENTIC_CANDIDATE_LIMIT
 
     def limit_documents(self, documents: list[Document], limit: int) -> list[Document]:
         if limit <= 0:

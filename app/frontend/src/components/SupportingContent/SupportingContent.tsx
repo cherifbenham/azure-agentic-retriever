@@ -13,9 +13,11 @@ export const SupportingContent = ({ supportingContent }: Props) => {
     const textItems = supportingContent?.text ?? [];
     const imageItems = supportingContent?.images ?? [];
     const webItems = supportingContent?.external_results_metadata ?? [];
+    const maxTextItems = 2;
+    const visibleTextItems = textItems.slice(0, maxTextItems);
     return (
         <ul className={styles.supportingContentNavList}>
-            {textItems.map((c, ind) => {
+            {visibleTextItems.map((c, ind) => {
                 const parsed = parseSupportingContentItem(c);
                 return (
                     <li className={styles.supportingContentItem} key={`supporting-content-text-${ind}`}>

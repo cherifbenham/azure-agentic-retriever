@@ -168,7 +168,7 @@ class RetrieveThenReadApproach(Approach):
         use_semantic_ranker = True if overrides.get("semantic_ranker") else False
         use_query_rewriting = True if overrides.get("query_rewriting") else False
         use_semantic_captions = True if overrides.get("semantic_captions") else False
-        top = overrides.get("top", 3)
+        top = overrides.get("top", 5)
         minimum_search_score = overrides.get("minimum_search_score", 0.0)
         minimum_reranker_score = overrides.get("minimum_reranker_score", 0.0)
         filter = self.build_filter(overrides, q)
@@ -279,9 +279,8 @@ class RetrieveThenReadApproach(Approach):
             retrieval_reasoning_effort=retrieval_reasoning_effort,
             should_rewrite_query=False,
         )
-        agentic_results.documents = self.limit_documents(
-            agentic_results.documents, self.get_expert_limit(overrides)
-        )
+        candidate_limit = self.get_candidate_limit(overrides)
+        agentic_results.documents = self.limit_documents(agentic_results.documents, candidate_limit)
 
         data_points = await self.get_sources_content(
             agentic_results.documents,

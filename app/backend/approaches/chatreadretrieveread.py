@@ -343,7 +343,7 @@ class ChatReadRetrieveReadApproach(Approach):
         use_semantic_ranker = True if overrides.get("semantic_ranker") else False
         use_semantic_captions = True if overrides.get("semantic_captions") else False
         use_query_rewriting = True if overrides.get("query_rewriting") else False
-        top = overrides.get("top", 3)
+        top = overrides.get("top", 5)
         minimum_search_score = overrides.get("minimum_search_score", 0.0)
         minimum_reranker_score = overrides.get("minimum_reranker_score", 0.0)
         search_index_filter = self.build_filter(overrides, original_user_query)
@@ -487,9 +487,8 @@ class ChatReadRetrieveReadApproach(Approach):
             use_sharepoint_source=effective_sharepoint_source,
             retrieval_reasoning_effort=retrieval_reasoning_effort,
         )
-        agentic_results.documents = self.limit_documents(
-            agentic_results.documents, self.get_expert_limit(overrides)
-        )
+        candidate_limit = self.get_candidate_limit(overrides)
+        agentic_results.documents = self.limit_documents(agentic_results.documents, candidate_limit)
 
         data_points = await self.get_sources_content(
             agentic_results.documents,
