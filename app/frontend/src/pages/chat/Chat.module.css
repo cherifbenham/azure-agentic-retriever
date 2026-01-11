@@ -96,36 +96,6 @@
     gap: 0.4rem;
 }
 
-.heroProgress {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    width: 100%;
-}
-
-.heroProgressHeader {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.95rem;
-    color: var(--color-ink-muted);
-}
-
-.heroProgressTrack {
-    width: 100%;
-    height: 0.5rem;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.12);
-    overflow: hidden;
-}
-
-.heroProgressFill {
-    display: block;
-    height: 100%;
-    width: 4%;
-    background: linear-gradient(90deg, #4ed3b5 0%, #68c6ff 100%);
-    border-radius: 999px;
-}
-
 .heroChips {
     display: flex;
     flex-wrap: wrap;

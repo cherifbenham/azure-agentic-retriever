@@ -526,15 +526,6 @@ const Chat = () => {
                                         <h1 className={styles.chatEmptyStateTitle}>{t("chatEmptyStateTitle")}</h1>
                                         <p className={styles.chatEmptyStateSubtitle}>{t("chatEmptyStateSubtitle")}</p>
                                     </div>
-                                    <div className={styles.heroProgress}>
-                                        <div className={styles.heroProgressHeader}>
-                                            <span>{t("heroProgressLabel")}</span>
-                                            <span>{t("heroProgressValue")}</span>
-                                        </div>
-                                        <div className={styles.heroProgressTrack}>
-                                            <span className={styles.heroProgressFill} />
-                                        </div>
-                                    </div>
                                     <div className={styles.heroChips}>
                                         <span className={styles.heroChip}>{t("heroChip1")}</span>
                                         <span className={styles.heroChip}>{t("heroChip2")}</span>
